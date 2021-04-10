@@ -36,10 +36,10 @@ jobs:
           echo "$HOME/.deno/bin" >> $env:GITHUB_PATH
 
       - name: Run tests
-        run: cd tests/ && deno test --coverage=./cov --allow-read --unstable
+        run: cd tests/ && deno test --coverage=../cov --allow-read --unstable
 
       - name: Generate lcov
-        run: deno coverage --unstable --lcov ./cov > cov.lcov
+        run: cd .. && deno coverage --unstable --lcov ./cov > cov.lcov
 
       - name: Upload coverage
         uses: codecov/codecov-action@v1
