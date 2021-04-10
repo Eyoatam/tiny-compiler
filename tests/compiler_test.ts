@@ -189,17 +189,140 @@ Deno.test("generate code for not nested CallExpressions", () => {
   assertEquals(code, output);
 });
 
-Deno.test("compiler for code with not nested CallExpressions", () => {
+Deno.test("compiler for code with nested CallExpressions", () => {
   const input = "(add 1 (subtract 6 5))";
   const output = compile(input);
   const code = "add(1, subtract(6, 5));";
   assertEquals(code, output);
 });
 
-Deno.test("compiler for code with nested CallExpressions", () => {
+Deno.test("compiler for code with not nested CallExpressions", () => {
   const input = `(add 1)
   (subtract 6 5)`;
   const output = compile(input);
   const code = "add(1);\nsubtract(6, 5);";
   assertEquals(code, output);
 });
+
+Deno.test("all", () => {
+  const notNestedInput = `(add 1)
+  (subtract 6 5)`;
+  const nestedInput = "(add 1 (subtract 6 5))";
+  const nestedTokens = tokenize(nestedInput);
+  assertEquals(nestedTokens, [
+    { type: "paren", value: "(" },
+    { type: "name", value: "add" },
+    { type: "number", value: "1" },
+    { type: "paren", value: "(" },
+    { type: "name", value: "subtract" },
+    { type: "number", value: "6" },
+    { type: "number", value: "5" },
+    { type: "paren", value: ")" },
+    { type: "paren", value: ")" },
+  ])
+  const notNestedTokens = tokenize(notNestedInput)
+  assertEquals(notNestedTokens, [
+    { type: "paren", value: "(" },
+    { type: "name", value: "add" },
+    { type: "number", value: "1" },
+    { type: "paren", value: ")" },
+    { type: "paren", value: "(" },
+    { type: "name", value: "subtract" },
+    { type: "number", value: "6" },
+    { type: "number", value: "5" },
+    { type: "paren", value: ")" },
+  ]);
+  const nestedAst = parse(nestedTokens);
+  assertEquals(nestedAst, {
+    type: "Program",
+    body: [
+      {
+        type: "CallExpression",
+        name: "add",
+        params: [
+          { type: "NumberLiteral", value: "1" },
+          {
+            type: "CallExpression",
+            name: "subtract",
+            params: [
+              { type: "NumberLiteral", value: "6" },
+              { type: "NumberLiteral", value: "5" },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  const notNestedAst = parse(notNestedTokens);
+  assertEquals(notNestedAst, {
+    type: "Program",
+    body: [
+      {
+        type: "CallExpression",
+        name: "add",
+        params: [{ type: "NumberLiteral", value: "1" }],
+      },
+      {
+        type: "CallExpression",
+        name: "subtract",
+        params: [
+          { type: "NumberLiteral", value: "6" },
+          { type: "NumberLiteral", value: "5" },
+        ],
+      },
+    ],
+  });
+  const newNestedAst = transform(nestedAst);
+  assertEquals(newNestedAst, {
+    type: "Program",
+    body: [
+      {
+        type: "ExpressionStatement",
+        expression: {
+          type: "CallExpression",
+          callee: { type: "Identifier", name: "add" },
+          arguments: [
+            { type: "NumberLiteral", value: "1" },
+            {
+              type: "CallExpression",
+              callee: { type: "Identifier", name: "subtract" },
+              "arguments": [
+                { type: "NumberLiteral", value: "6" },
+                { type: "NumberLiteral", value: "5" },
+              ],
+              expression: {},
+            },
+          ],
+          expression: {},
+        },
+      },
+    ],
+  });
+  const newNotNestedAst = transform(notNestedAst);
+  assertEquals(newNotNestedAst, {
+    type: "Program",
+    body: [
+      {
+        type: "ExpressionStatement",
+        expression: {
+          type: "CallExpression",
+          callee: { type: "Identifier", name: "add" },
+          arguments: [{ type: "NumberLiteral", value: "1" }],
+          expression: {},
+        },
+      },
+      {
+        type: "ExpressionStatement",
+        expression: {
+          type: "CallExpression",
+          callee: { type: "Identifier", name: "subtract" },
+          arguments: [
+            { type: "NumberLiteral", value: "6" },
+            { type: "NumberLiteral", value: "5" },
+          ],
+          expression: {},
+        },
+      },
+    ],
+  })
+})
