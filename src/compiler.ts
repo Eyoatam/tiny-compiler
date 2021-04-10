@@ -279,7 +279,7 @@ export function transform(ast: {
   return newAst;
 }
 
-function generate(node: {
+export function generate(node: {
   type?: string;
   body: any[];
   expression?: any;
