@@ -185,7 +185,7 @@ export function traverse(ast: any, visitor: Visitor) {
   }
   function traverseNode(
     node: { type: string; body: any[]; params: any[] },
-    parent: any
+    parent: any,
   ) {
     let methods = visitor[node.type];
 
@@ -232,7 +232,7 @@ export function transform(ast: {
     NumberLiteral: {
       enter(
         node: { value: any },
-        parent: { _context: { type: string; value: any }[] }
+        parent: { _context: { type: string; value: any }[] },
       ) {
         parent._context.push({
           type: "NumberLiteral",
@@ -256,7 +256,7 @@ export function transform(ast: {
         parent: {
           type: string;
           _context: Context[];
-        }
+        },
       ) {
         let expression: Expression = {
           type: "CallExpression",
