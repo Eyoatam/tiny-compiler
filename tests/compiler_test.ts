@@ -44,37 +44,46 @@ Deno.test("Tokenize not nested CallExpressions", () => {
 Deno.test("Tokenize number literals", () => {
   const input = "1 2";
   const tokens = tokenize(input);
-  assertEquals(tokens, [ { type: "number", value: "1" }, { type: "number", value: "2" } ])
+  assertEquals(tokens, [{ type: "number", value: "1" }, {
+    type: "number",
+    value: "2",
+  }]);
 });
 
 Deno.test("Tokenize string literals", () => {
   const input = `"some" "string"`;
   const tokens = tokenize(input);
-  assertEquals(tokens, [ { type: "string", value: "some" }, { type: "string", value: "string" } ])
-})
+  assertEquals(tokens, [{ type: "string", value: "some" }, {
+    type: "string",
+    value: "string",
+  }]);
+});
 
 Deno.test("parse string literals", () => {
   const input = `"some" "string"`;
   const tokens = tokenize(input);
-  const ast = parse(tokens)
+  const ast = parse(tokens);
   assertEquals(ast, {
     type: "Program",
     body: [
       { type: "StringLiteral", value: "some" },
-      { type: "StringLiteral", value: "string" }
-    ]
-  })
+      { type: "StringLiteral", value: "string" },
+    ],
+  });
 });
 
 Deno.test("parse number literals", () => {
   const input = `1 2`;
   const tokens = tokenize(input);
-  const ast = parse(tokens)
+  const ast = parse(tokens);
   assertEquals(ast, {
     type: "Program",
-    body: [ { type: "NumberLiteral", value: "1" }, { type: "NumberLiteral", value: "2" } ]
-  })
-})
+    body: [{ type: "NumberLiteral", value: "1" }, {
+      type: "NumberLiteral",
+      value: "2",
+    }],
+  });
+});
 
 Deno.test("parse nested CallExpression", () => {
   const input = "(add 1 (subtract 6 5))";
@@ -252,8 +261,8 @@ Deno.test("all", () => {
     { type: "number", value: "5" },
     { type: "paren", value: ")" },
     { type: "paren", value: ")" },
-  ])
-  const notNestedTokens = tokenize(notNestedInput)
+  ]);
+  const notNestedTokens = tokenize(notNestedInput);
   assertEquals(notNestedTokens, [
     { type: "paren", value: "(" },
     { type: "name", value: "add" },
@@ -357,5 +366,5 @@ Deno.test("all", () => {
         },
       },
     ],
-  })
-})
+  });
+});

@@ -318,7 +318,3 @@ export function compile(input: string): string {
   const output = generate(newAst);
   return output;
 }
-const input = `1 2`;
-const tokens = tokenize(input);
-const ast = parse(tokens)
-console.log(ast)
