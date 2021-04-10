@@ -44,19 +44,25 @@ Deno.test("Tokenize not nested CallExpressions", () => {
 Deno.test("Tokenize number literals", () => {
   const input = "1 2";
   const tokens = tokenize(input);
-  assertEquals(tokens, [{ type: "number", value: "1" }, {
-    type: "number",
-    value: "2",
-  }]);
+  assertEquals(tokens, [
+    { type: "number", value: "1" },
+    {
+      type: "number",
+      value: "2",
+    },
+  ]);
 });
 
 Deno.test("Tokenize string literals", () => {
   const input = `"some" "string"`;
   const tokens = tokenize(input);
-  assertEquals(tokens, [{ type: "string", value: "some" }, {
-    type: "string",
-    value: "string",
-  }]);
+  assertEquals(tokens, [
+    { type: "string", value: "some" },
+    {
+      type: "string",
+      value: "string",
+    },
+  ]);
 });
 
 Deno.test("parse string literals", () => {
@@ -78,10 +84,13 @@ Deno.test("parse number literals", () => {
   const ast = parse(tokens);
   assertEquals(ast, {
     type: "Program",
-    body: [{ type: "NumberLiteral", value: "1" }, {
-      type: "NumberLiteral",
-      value: "2",
-    }],
+    body: [
+      { type: "NumberLiteral", value: "1" },
+      {
+        type: "NumberLiteral",
+        value: "2",
+      },
+    ],
   });
 });
 
@@ -158,7 +167,7 @@ Deno.test("Transform ast for nested CallExpressions", () => {
             {
               type: "CallExpression",
               callee: { type: "Identifier", name: "subtract" },
-              "arguments": [
+              arguments: [
                 { type: "NumberLiteral", value: "6" },
                 { type: "NumberLiteral", value: "5" },
               ],
@@ -200,6 +209,67 @@ Deno.test("Transform ast for not nested CallExpressions", () => {
           arguments: [
             { type: "NumberLiteral", value: "6" },
             { type: "NumberLiteral", value: "5" },
+          ],
+          expression: {},
+        },
+      },
+    ],
+  };
+  const newAst = transform(ast);
+  assertEquals(ast2, newAst);
+});
+
+Deno.test("Transform ast for StringLiterals", () => {
+  const input = `(foo "foo") (baz "baz")`;
+  const tokens = tokenize(input);
+  const ast = parse(tokens);
+  const ast2 = {
+    type: "Program",
+    body: [
+      {
+        type: "ExpressionStatement",
+        expression: {
+          type: "CallExpression",
+          callee: { type: "Identifier", name: "foo" },
+          arguments: [{ type: "StringLiteral", value: "foo" }],
+          expression: {},
+        },
+      },
+      {
+        type: "ExpressionStatement",
+        expression: {
+          type: "CallExpression",
+          callee: { type: "Identifier", name: "baz" },
+          arguments: [{ type: "StringLiteral", value: "baz" }],
+          expression: {},
+        },
+      },
+    ],
+  };
+  const newAst = transform(ast);
+  assertEquals(newAst, ast2);
+});
+
+Deno.test("Transform ast for nested StringLiterals", () => {
+  const input = `(foo "foo" (bar "bar"))`;
+  const tokens = tokenize(input);
+  const ast = parse(tokens);
+  const ast2 = {
+    type: "Program",
+    body: [
+      {
+        type: "ExpressionStatement",
+        expression: {
+          type: "CallExpression",
+          callee: { type: "Identifier", name: "foo" },
+          arguments: [
+            { type: "StringLiteral", value: "foo" },
+            {
+              type: "CallExpression",
+              callee: { type: "Identifier", name: "bar" },
+              arguments: [{ type: "StringLiteral", value: "bar" }],
+              expression: {},
+            },
           ],
           expression: {},
         },
@@ -328,7 +398,7 @@ Deno.test("all", () => {
             {
               type: "CallExpression",
               callee: { type: "Identifier", name: "subtract" },
-              "arguments": [
+              arguments: [
                 { type: "NumberLiteral", value: "6" },
                 { type: "NumberLiteral", value: "5" },
               ],

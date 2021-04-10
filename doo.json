@@ -1,0 +1,22 @@
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "ExpressionStatement",
+      "expression": {
+        "type": "CallExpression",
+        "callee": { "type": "Identifier", "name": "foo" },
+        "arguments": [
+          { "type": "StringLiteral", "value": "foo" },
+          {
+            "type": "CallExpression",
+            "callee": { "type": "Identifier", "name": "bar" },
+            "arguments": [{ "type": "StringLiteral", "value": "bar" }],
+            "expression": {}
+          }
+        ],
+        "expression": {}
+      }
+    }
+  ]
+}
