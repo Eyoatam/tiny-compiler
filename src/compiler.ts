@@ -1,5 +1,3 @@
-// deno-lint-ignore-file
-
 export interface Token {
   type: string;
   value: string;
@@ -13,23 +11,42 @@ export interface Callee {
 export interface Context {
   type: string;
   value?: string;
-  callee?: { type: string; name: any };
-  arguments?: any[];
+  callee?: { type: string; name: string };
+  arguments?: string[];
 }
 
 export interface Visitor {
   [index: string]: {
-    enter(node: any, parent: any): void;
-    exit?(node: any, parent: any): void;
+    enter: EnterFn;
+    exit?: ExitFn;
   };
-  NumberLiteral: { enter(node: any, parent: any): void };
-  StringLiteral: { enter(node: any, parent: any): void };
-  CallExpression: { enter(node: any, parent: any): void };
+  NumberLiteral: {
+    enter: EnterFn;
+  };
+  StringLiteral: {
+    enter: EnterFn;
+  };
+  CallExpression: {
+    enter: EnterFn;
+  };
 }
+
+export type EnterFn = (
+  node: {
+    value?: string;
+    _context?: Context[];
+    name?: string;
+    body?: unkObj[];
+  },
+  parent: { type: string; _context: { type: string; value: string }[] },
+) => void;
+
+export type ExitFn = EnterFn;
 
 export type Expression = {
   type: string;
   callee?: { type: string; name: string };
+  // deno-lint-ignore no-explicit-any
   arguments?: string[] | any[];
   expression: unkObj;
 };
@@ -177,17 +194,25 @@ export function parse(tokens: Token[]) {
   return ast;
 }
 
-export function traverse(ast: any, visitor: Visitor) {
-  function traverseArray(array: any[], parent: any) {
+export function traverse(
+  ast: { type: string; body: unkObj[]; params?: unkObj[] },
+  visitor: Visitor,
+) {
+  function traverseArray(
+    array: unkObj[],
+    parent: { type: string; body: unkObj[]; params?: unkObj[] },
+  ) {
+    // deno-lint-ignore no-explicit-any
     array.forEach((child: any) => {
       traverseNode(child, parent);
     });
   }
   function traverseNode(
-    node: { type: string; body: any[]; params: any[] },
-    parent: any,
+    node: { type: string; body: unkObj[]; params?: unkObj[] },
+    // deno-lint-ignore no-explicit-any
+    parent: { type: string; _context: { type: string; value: string }[] } | any,
   ) {
-    let methods = visitor[node.type];
+    const methods = visitor[node.type];
 
     if (methods && methods.enter) {
       methods.enter(node, parent);
@@ -198,7 +223,7 @@ export function traverse(ast: any, visitor: Visitor) {
         break;
 
       case "CallExpression":
-        traverseArray(node.params, node);
+        traverseArray(node.params ? node.params : [], node);
         break;
 
       case "NumberLiteral":
@@ -217,8 +242,9 @@ export function traverse(ast: any, visitor: Visitor) {
   traverseNode(ast, null);
 }
 export function transform(ast: {
-  type?: string;
-  body?: unkObj[];
+  type: string;
+  body: unkObj[];
+  // deno-lint-ignore no-explicit-any
   _context?: any;
 }) {
   const newAst: { type: string; body: unkObj[] } = {
@@ -231,18 +257,18 @@ export function transform(ast: {
   traverse(ast, {
     NumberLiteral: {
       enter(
-        node: { value: any },
-        parent: { _context: { type: string; value: any }[] },
+        node: { value?: string },
+        parent: { _context: { type: string; value: string }[] },
       ) {
         parent._context.push({
           type: "NumberLiteral",
-          value: node.value,
+          value: node.value ? node.value : "",
         });
       },
     },
 
     StringLiteral: {
-      enter(node: { value: any }, parent: { _context: Context[] }) {
+      enter(node: { value?: string }, parent: { _context: Context[] }) {
         parent._context.push({
           type: "StringLiteral",
           value: node.value,
@@ -252,7 +278,7 @@ export function transform(ast: {
 
     CallExpression: {
       enter(
-        node: { name: string; _context: Context[] },
+        node: { name?: string; _context?: Context[] },
         parent: {
           type: string;
           _context: Context[];
@@ -262,7 +288,7 @@ export function transform(ast: {
           type: "CallExpression",
           callee: {
             type: "Identifier",
-            name: node.name,
+            name: node.name ? node.name : "",
           },
           arguments: [],
           expression: {},
@@ -283,9 +309,13 @@ export function transform(ast: {
 
 export function generate(node: {
   type?: string;
+  // deno-lint-ignore no-explicit-any
   body: any[];
+  // deno-lint-ignore no-explicit-any
   expression?: any;
+  // deno-lint-ignore no-explicit-any
   callee?: any;
+  // deno-lint-ignore no-explicit-any
   arguments?: any[];
   name?: string;
   value?: string;
