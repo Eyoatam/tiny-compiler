@@ -1,3 +1,4 @@
+
 name: ci
 
 on:
@@ -34,20 +35,16 @@ jobs:
         run: |-
           curl -fsSL https://deno.land/x/install/install.sh | sh
           echo "$HOME/.deno/bin" >> $env:GITHUB_PATH
+      - name: Run tests
+        run: deno test --coverage=./cov --unstable
 
-      - name: run tests
-        run: deno test
-
-      - name: run tests unstable
-        run: deno test --coverage=./cov --allow-read --allow-write --unstable
-
-      - name: generate lcov
+      - name: Generate lcov
         run: deno coverage --unstable --lcov ./cov > cov.lcov
 
-      - name: upload coverage
-        if: matrix.os == 'ubuntu-latest'
+      - name: Upload coverage
         uses: codecov/codecov-action@v1
         with:
+          name: ${{ matrix.os }}-${{ matrix.deno }}
           files: cov.lcov
 
   lint:
@@ -63,9 +60,8 @@ jobs:
         run: |-
           curl -fsSL https://deno.land/x/install/install.sh | sh
           echo "$HOME/.deno/bin" >> $GITHUB_PATH
-
       - name: Format
-        run: deno fmt --check --ignore=tests/testdata/
+        run: deno fmt --check
 
       - name: Lint
         run: deno lint --unstable
