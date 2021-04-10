@@ -318,5 +318,7 @@ export function compile(input: string): string {
   const output = generate(newAst);
   return output;
 }
-// const code = compile("(add 1 (subtract 6 5))");
-// await Deno.writeFile("./code.js", new TextEncoder().encode(code));
+const input = `1 2`;
+const tokens = tokenize(input);
+const ast = parse(tokens)
+console.log(ast)

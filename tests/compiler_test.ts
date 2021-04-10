@@ -7,8 +7,6 @@ import {
   transform,
 } from "../src/compiler.ts";
 
-const { readFile } = Deno;
-
 Deno.test("Tokenize nested CallExpressions", () => {
   const input = "(add 1 (subtract 6 5))";
   const tokens = tokenize(input);
@@ -42,6 +40,41 @@ Deno.test("Tokenize not nested CallExpressions", () => {
     { type: "paren", value: ")" },
   ]);
 });
+
+Deno.test("Tokenize number literals", () => {
+  const input = "1 2";
+  const tokens = tokenize(input);
+  assertEquals(tokens, [ { type: "number", value: "1" }, { type: "number", value: "2" } ])
+});
+
+Deno.test("Tokenize string literals", () => {
+  const input = `"some" "string"`;
+  const tokens = tokenize(input);
+  assertEquals(tokens, [ { type: "string", value: "some" }, { type: "string", value: "string" } ])
+})
+
+Deno.test("parse string literals", () => {
+  const input = `"some" "string"`;
+  const tokens = tokenize(input);
+  const ast = parse(tokens)
+  assertEquals(ast, {
+    type: "Program",
+    body: [
+      { type: "StringLiteral", value: "some" },
+      { type: "StringLiteral", value: "string" }
+    ]
+  })
+});
+
+Deno.test("parse number literals", () => {
+  const input = `1 2`;
+  const tokens = tokenize(input);
+  const ast = parse(tokens)
+  assertEquals(ast, {
+    type: "Program",
+    body: [ { type: "NumberLiteral", value: "1" }, { type: "NumberLiteral", value: "2" } ]
+  })
+})
 
 Deno.test("parse nested CallExpression", () => {
   const input = "(add 1 (subtract 6 5))";
