@@ -43,50 +43,129 @@ Deno.test("Tokenize not nested CallExpressions", () => {
   ]);
 });
 
-Deno.test("parse nested CallExpression", async () => {
-  const input = "(add 1 (subtract 6 5))";
-  const tokens = tokenize(input);
-  const ast = JSON.stringify(parse(tokens));
-  const decoder = new TextDecoder("utf-8");
-  const file = await readFile("./testdata/ast1.json");
-  const ast1 = decoder.decode(file);
-  assertEquals(ast, ast1);
-});
-
-Deno.test("parse not nested CallExpression", async () => {
-  const input = `(add 1)
-  (subtract 6 5)
-  `;
-  const tokens = tokenize(input);
-  const ast = JSON.stringify(parse(tokens));
-  const decoder = new TextDecoder("utf-8");
-  const file = await readFile("./testdata/ast2.json");
-  const ast1 = decoder.decode(file);
-  assertEquals(ast, ast1);
-});
-
-Deno.test("Transform ast for nested CallExpressions", async () => {
+Deno.test("parse nested CallExpression", () => {
   const input = "(add 1 (subtract 6 5))";
   const tokens = tokenize(input);
   const ast = parse(tokens);
-  const newAst = JSON.stringify(transform(ast));
-  const decoder = new TextDecoder("utf-8");
-  const file = await readFile("./testdata/ast3.json");
-  const ast1 = decoder.decode(file);
-  assertEquals(ast1, newAst);
+  const ast2 = {
+    type: "Program",
+    body: [
+      {
+        type: "CallExpression",
+        name: "add",
+        params: [
+          { type: "NumberLiteral", value: "1" },
+          {
+            type: "CallExpression",
+            name: "subtract",
+            params: [
+              { type: "NumberLiteral", value: "6" },
+              { type: "NumberLiteral", value: "5" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+
+  assertEquals(ast, ast2);
 });
 
-Deno.test("Transform ast for not nested CallExpressions", async () => {
+Deno.test("parse not nested CallExpression", () => {
   const input = `(add 1)
   (subtract 6 5)
   `;
   const tokens = tokenize(input);
   const ast = parse(tokens);
-  const newAst = JSON.stringify(transform(ast));
-  const decoder = new TextDecoder("utf-8");
-  const file = await readFile("./testdata/ast4.json");
-  const ast1 = decoder.decode(file);
-  assertEquals(ast1, newAst);
+  const ast2 =  {
+    type: "Program",
+    body: [
+      {
+        type: "CallExpression",
+        name: "add",
+        params: [{ type: "NumberLiteral", value: "1" }]
+      },
+      {
+        type: "CallExpression",
+        name: "subtract",
+        params: [
+          { type: "NumberLiteral", value: "6" },
+          { type: "NumberLiteral", value: "5" }
+        ]
+      }
+    ]
+  }
+
+  assertEquals(ast, ast2);
+});
+
+Deno.test("Transform ast for nested CallExpressions", () => {
+  const input = "(add 1 (subtract 6 5))";
+  const tokens = tokenize(input);
+  const ast = parse(tokens);
+  const ast2 = {
+    type: "Program",
+    body: [
+      {
+        type: "ExpressionStatement",
+        expression: {
+          type: "CallExpression",
+          callee: { type: "Identifier", name: "add" },
+          arguments: [
+            { type: "NumberLiteral", value: "1" },
+            {
+              type: "CallExpression",
+              callee: { type: "Identifier", name: "subtract" },
+              "arguments": [
+                { type: "NumberLiteral", value: "6" },
+                { type: "NumberLiteral", value: "5" }
+              ],
+              expression: {}
+            }
+          ],
+          expression: {}
+        }
+      }
+    ]
+  }
+  const newAst = transform(ast);
+  assertEquals(ast2, newAst);
+});
+
+Deno.test("Transform ast for not nested CallExpressions", () => {
+  const input = `(add 1)
+  (subtract 6 5)
+  `;
+  const tokens = tokenize(input);
+  const ast = parse(tokens);
+  const ast2 = {
+    type: "Program",
+    body: [
+      {
+        type: "ExpressionStatement",
+        expression: {
+          type: "CallExpression",
+          callee: { type: "Identifier", name: "add" },
+          arguments: [{ type: "NumberLiteral", value: "1" }],
+          expression: {}
+        }
+      },
+      {
+        type: "ExpressionStatement",
+        expression: {
+          type: "CallExpression",
+          callee: { type: "Identifier", name: "subtract" },
+          arguments: [
+            { type: "NumberLiteral", value: "6" },
+            { type: "NumberLiteral", value: "5" }
+          ],
+          expression: {}
+        }
+      }
+    ]
+  }
+  const newAst = transform(ast);
+  assertEquals(ast2, newAst);
 });
 
 Deno.test("generate code for nested CallExpressions", () => {
