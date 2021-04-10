@@ -36,7 +36,7 @@ jobs:
           echo "$HOME/.deno/bin" >> $env:GITHUB_PATH
 
       - name: Run tests
-        run: deno test --coverage=../cov --allow-read --unstable
+        run: deno test --coverage=./cov --allow-read --unstable
 
       - name: Generate lcov
         run: deno coverage --unstable --lcov ./cov > cov.lcov
