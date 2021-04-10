@@ -1,1 +1,0 @@
-{"scriptId":"52","url":"deno:runtime/js/40_read_file.js","functions":[{"functionName":"readFile","ranges":[{"startOffset":374,"endOffset":525,"count":4}],"isBlockCoverage":true}]}
