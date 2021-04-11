@@ -348,6 +348,7 @@ export function transform(ast: Ast): Ast {
   return newAst;
 }
 
+// TODO: remove any types
 export function generate(node: {
   // deno-lint-ignore no-explicit-any
   body: Array<any>;
