@@ -11,8 +11,11 @@ export interface Callee {
 export interface Context {
   type: string;
   value?: string;
-  callee?: { type: string; name: string };
-  arguments?: string[];
+  callee?: {
+    type: string;
+    name: string;
+  };
+  arguments?: Array<Context>;
 }
 
 export interface Visitor {
@@ -33,39 +36,51 @@ export interface Visitor {
 
 export interface Ast {
   type: string;
-  body: unkObj[];
-  params?: unkObj[];
-  // deno-lint-ignore no-explicit-any
-  _context?: any;
+  body: Array<unkObj>;
+  params?: Array<unkObj>;
+  _context?: Array<{
+    type: string;
+    value: string;
+  }>;
+}
+
+export interface AstNode {
+  type: string;
+  body: Array<unkObj>;
+  _context?: Array<{
+    type: string;
+    value: string;
+  }>;
+  name?: string;
+  value?: string;
+  params?: Array<unkObj>;
+}
+
+export interface ParentNode {
+  type: string;
+  _context?: Array<{
+    type: string;
+    value: string;
+  }>;
 }
 
 export interface unkObj {
   [x: string]: unknown;
 }
 
-export type EnterFn = (
-  node: {
-    value?: string;
-    _context?: Context[];
-    name?: string;
-    body?: unkObj[];
-  },
-  parent: { type: string; _context: { type: string; value: string }[] },
-) => void;
-
+export type EnterFn = (node: AstNode, parent?: ParentNode) => void;
 export type ExitFn = EnterFn;
 
 export type Expression = {
   type: string;
-  callee?: { type: string; name: string };
-  // deno-lint-ignore no-explicit-any
-  arguments?: string[] | any[];
+  callee?: Callee;
+  arguments?: Array<Context>;
   expression: unkObj;
 };
 
-export function tokenize(input: string): Token[] {
+export function tokenize(input: string): Array<Token> {
   let current = 0;
-  const tokens: Token[] = [];
+  const tokens: Array<Token> = [];
 
   while (current < input.length) {
     let char = input[current];
@@ -140,7 +155,7 @@ export function tokenize(input: string): Token[] {
   return tokens;
 }
 
-export function parse(tokens: Token[]): Ast {
+export function parse(tokens: Array<Token>): Ast {
   let current = 0;
 
   function walk() {
@@ -169,7 +184,7 @@ export function parse(tokens: Token[]): Ast {
       const node: {
         type: string;
         name: string;
-        params: unkObj[];
+        params: Array<unkObj>;
       } = {
         type: "CallExpression",
         name: token.value,
@@ -205,31 +220,29 @@ export function parse(tokens: Token[]): Ast {
 }
 
 export function traverse(ast: Ast, visitor: Visitor) {
-  function traverseArray(array: unkObj[], parent: Ast) {
+  function traverseArray(array: Array<unkObj>, parent: ParentNode) {
     // deno-lint-ignore no-explicit-any
     array.forEach((child: any) => {
       traverseNode(child, parent);
     });
   }
 
-  function traverseNode(
-    node: Ast,
-    // deno-lint-ignore no-explicit-any
-    parent: { type: string; _context: { type: string; value: string }[] } | any,
-  ) {
+  function traverseNode(node: AstNode, parent?: ParentNode) {
     const methods = visitor[node.type];
 
     if (methods && methods.enter) {
       methods.enter(node, parent);
     }
     switch (node.type) {
-      case "Program":
+      case "Program": {
         traverseArray(node.body, node);
         break;
+      }
 
-      case "CallExpression":
+      case "CallExpression": {
         traverseArray(node.params ? node.params : [], node);
         break;
+      }
 
       case "NumberLiteral":
         break;
@@ -241,13 +254,24 @@ export function traverse(ast: Ast, visitor: Visitor) {
     }
 
     if (methods && methods.exit) {
-      methods.exit(node, parent);
+      methods.exit(node);
     }
   }
-  traverseNode(ast, null);
+  traverseNode(ast);
 }
 export function transform(ast: Ast): Ast {
-  const newAst: { type: string; body: unkObj[] } = {
+  const newAst: {
+    type: string;
+    body: Array<{
+      type: string;
+      value: string;
+    }>;
+    params?: Array<unkObj>;
+    _context?: Array<{
+      type: string;
+      value: string;
+    }>;
+  } = {
     type: "Program",
     body: [],
   };
@@ -257,10 +281,17 @@ export function transform(ast: Ast): Ast {
   traverse(ast, {
     NumberLiteral: {
       enter(
-        node: { value?: string },
-        parent: { _context: { type: string; value: string }[] },
+        node: {
+          value?: string;
+        },
+        parent?: {
+          _context?: Array<{
+            type: string;
+            value: string;
+          }>;
+        },
       ) {
-        parent._context.push({
+        parent?._context?.push({
           type: "NumberLiteral",
           value: node.value ? node.value : "",
         });
@@ -268,8 +299,15 @@ export function transform(ast: Ast): Ast {
     },
 
     StringLiteral: {
-      enter(node: { value?: string }, parent: { _context: Context[] }) {
-        parent._context.push({
+      enter(
+        node: {
+          value?: string;
+        },
+        parent?: {
+          _context?: Array<Context>;
+        },
+      ) {
+        parent?._context?.push({
           type: "StringLiteral",
           value: node.value,
         });
@@ -278,10 +316,13 @@ export function transform(ast: Ast): Ast {
 
     CallExpression: {
       enter(
-        node: { name?: string; _context?: Context[] },
-        parent: {
+        node: {
+          name?: string;
+          _context?: Array<Context>;
+        },
+        parent?: {
           type: string;
-          _context: Context[];
+          _context?: Array<Context>;
         },
       ) {
         let expression: Expression = {
@@ -294,13 +335,13 @@ export function transform(ast: Ast): Ast {
           expression: {},
         };
         node._context = expression.arguments ? expression.arguments : [];
-        if (parent.type !== "CallExpression") {
+        if (parent?.type !== "CallExpression") {
           expression = {
             type: "ExpressionStatement",
             expression,
           };
         }
-        parent._context.push(expression);
+        parent?._context?.push(expression);
       },
     },
   });
@@ -309,13 +350,13 @@ export function transform(ast: Ast): Ast {
 
 export function generate(node: {
   // deno-lint-ignore no-explicit-any
-  body: any[];
+  body: Array<any>;
   // deno-lint-ignore no-explicit-any
   expression?: any;
   // deno-lint-ignore no-explicit-any
   callee?: any;
   // deno-lint-ignore no-explicit-any
-  arguments?: any[];
+  arguments?: Array<any>;
   type?: string;
   name?: string;
   value?: string;
@@ -324,20 +365,18 @@ export function generate(node: {
     case "Program":
       return node.body.map(generate).join("\n");
     case "ExpressionStatement":
-      return generate(node.expression) + ";";
+      return `${generate(node.expression)};`;
     case "CallExpression":
-      return (
-        generate(node.callee) +
-        "(" +
-        node.arguments?.map(generate).join(", ") +
-        ")"
-      );
+      // deno-fmt-ignore
+      return `${generate(node.callee)}(${node.arguments
+        ?.map?.(generate)
+        .join?.(", ")})`;
     case "Identifier":
       return node.name ? node.name : "";
     case "NumberLiteral":
       return node.value ? node.value : "";
     case "StringLiteral":
-      return '"' + node.value + '"';
+      return `"${node.value}"`;
     default:
       throw new TypeError(`unknown type ${node.type}`);
   }
