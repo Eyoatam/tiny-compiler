@@ -31,6 +31,18 @@ export interface Visitor {
   };
 }
 
+export interface Ast {
+  type: string;
+  body: unkObj[];
+  params?: unkObj[];
+  // deno-lint-ignore no-explicit-any
+  _context?: any;
+}
+
+export interface unkObj {
+  [x: string]: unknown;
+}
+
 export type EnterFn = (
   node: {
     value?: string;
@@ -50,8 +62,6 @@ export type Expression = {
   arguments?: string[] | any[];
   expression: unkObj;
 };
-
-export type unkObj = Record<string, unknown>;
 
 export function tokenize(input: string): Token[] {
   let current = 0;
@@ -130,7 +140,7 @@ export function tokenize(input: string): Token[] {
   return tokens;
 }
 
-export function parse(tokens: Token[]) {
+export function parse(tokens: Token[]): Ast {
   let current = 0;
 
   function walk() {
@@ -182,7 +192,7 @@ export function parse(tokens: Token[]) {
     throw new TypeError(`Unknown type ${token.type}`);
   }
 
-  const ast: { type: string; body: unkObj[] } = {
+  const ast: Ast = {
     type: "Program",
     body: [],
   };
@@ -194,21 +204,16 @@ export function parse(tokens: Token[]) {
   return ast;
 }
 
-export function traverse(
-  ast: { type: string; body: unkObj[]; params?: unkObj[] },
-  visitor: Visitor,
-) {
-  function traverseArray(
-    array: unkObj[],
-    parent: { type: string; body: unkObj[]; params?: unkObj[] },
-  ) {
+export function traverse(ast: Ast, visitor: Visitor) {
+  function traverseArray(array: unkObj[], parent: Ast) {
     // deno-lint-ignore no-explicit-any
     array.forEach((child: any) => {
       traverseNode(child, parent);
     });
   }
+
   function traverseNode(
-    node: { type: string; body: unkObj[]; params?: unkObj[] },
+    node: Ast,
     // deno-lint-ignore no-explicit-any
     parent: { type: string; _context: { type: string; value: string }[] } | any,
   ) {
@@ -241,12 +246,7 @@ export function traverse(
   }
   traverseNode(ast, null);
 }
-export function transform(ast: {
-  type: string;
-  body: unkObj[];
-  // deno-lint-ignore no-explicit-any
-  _context?: any;
-}) {
+export function transform(ast: Ast): Ast {
   const newAst: { type: string; body: unkObj[] } = {
     type: "Program",
     body: [],
@@ -308,7 +308,6 @@ export function transform(ast: {
 }
 
 export function generate(node: {
-  type?: string;
   // deno-lint-ignore no-explicit-any
   body: any[];
   // deno-lint-ignore no-explicit-any
@@ -317,6 +316,7 @@ export function generate(node: {
   callee?: any;
   // deno-lint-ignore no-explicit-any
   arguments?: any[];
+  type?: string;
   name?: string;
   value?: string;
 }): string {
