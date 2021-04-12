@@ -75,29 +75,29 @@ node in the AST.
 This function takes the AST and transforms it into a new AST
 
 ```js
-{
-   type: "Program",
-    body: [
-      {
-        type: "CallExpression",
-        name: "add",
-        params: [
-          { type: "NumberLiteral", value: "6" },
-          {
-            type: "CallExpression",
-            name: "subtract",
-            params: [
-              { type: "NumberLiteral", value: "6" },
-              { type: "NumberLiteral", value: "5" },
-            ],
-          },
-        ],
-      },
-    ],
-  };
+transform({
+  type: "Program",
+  body: [
+    {
+      type: "CallExpression",
+      name: "add",
+      params: [
+        { type: "NumberLiteral", value: "6" },
+        {
+          type: "CallExpression",
+          name: "subtract",
+          params: [
+            { type: "NumberLiteral", value: "6" },
+            { type: "NumberLiteral", value: "5" },
+          ],
+        },
+      ],
+    },
+  ],
+});
 ```
 
-So for he above AST the transformed AST would look like:
+So The above function will return a transformed ast that would look like:
 
 ```js
 {

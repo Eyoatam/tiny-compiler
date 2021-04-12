@@ -5,7 +5,7 @@
       "name": "Deno: Run",
       "request": "launch",
       "type": "pwa-node",
-      "program": "main.ts",
+      "program": "src/compiler.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "runtimeArgs": [
