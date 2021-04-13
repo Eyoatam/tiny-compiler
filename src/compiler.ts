@@ -19,7 +19,7 @@ export interface Context {
 }
 
 export interface Visitor {
-  [index: string]: {
+  [key: string]: {
     enter: EnterFn;
     exit?: ExitFn;
   };

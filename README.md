@@ -133,11 +133,31 @@ This function takes an AST and stringifies code back out. by calling it self
 recursively.
 
 ```js
-const input = "(add 1 (subtract 6 5))";
-const tokens = tokenize(input);
-const ast = parse(tokens);
-const newAst = transform(ast);
-const output = generate(newAst);
+generate({
+    type: "Program",
+    body: [
+      {
+        type: "ExpressionStatement",
+        expression: {
+          type: "CallExpression",
+          callee: { type: "Identifier", name: "add" },
+          arguments: [
+            { type: "NumberLiteral", value: "1" },
+            {
+              type: "CallExpression",
+              callee: { type: "Identifier", name: "subtract" },
+              arguments: [
+                { type: "NumberLiteral", value: "6" },
+                { type: "NumberLiteral", value: "5" },
+              ],
+              expression: {},
+            },
+          ],
+          expression: {},
+        },
+      },
+    ],
+  };);
 ```
 
 so the output for the above code will look like:
