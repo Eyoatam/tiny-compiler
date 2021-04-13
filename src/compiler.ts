@@ -368,7 +368,6 @@ export function generate(node: {
     case "ExpressionStatement":
       return `${generate(node.expression)};`;
     case "CallExpression":
-      // deno-fmt-ignore
       return `${generate(node.callee)}(${node.arguments
         ?.map?.(generate)
         .join?.(", ")})`;
