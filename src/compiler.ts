@@ -273,6 +273,7 @@ export function traverse(ast: Ast, visitor: Visitor) {
   }
   traverseNode(ast);
 }
+
 export function transform(ast: Ast): Ast {
   const newAst: {
     type: string;
@@ -305,7 +306,7 @@ export function transform(ast: Ast): Ast {
           }>;
         },
       ) {
-        parent?._context?.push({
+        parent?._context?.push?.({
           type: "NumberLiteral",
           value: node.value ? node.value : "",
         });
@@ -321,7 +322,7 @@ export function transform(ast: Ast): Ast {
           _context?: Array<Context>;
         },
       ) {
-        parent?._context?.push({
+        parent?._context?.push?.({
           type: "StringLiteral",
           value: node.value,
         });
@@ -355,7 +356,7 @@ export function transform(ast: Ast): Ast {
             expression,
           };
         }
-        parent?._context?.push(expression);
+        parent?._context?.push?.(expression);
       },
     },
   });

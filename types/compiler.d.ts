@@ -4,10 +4,12 @@ interface Token {
   type: string;
   value: string;
 }
+
 interface Callee {
   type: string;
   name: string;
 }
+
 interface Context {
   type: string;
   value?: string;
@@ -17,6 +19,7 @@ interface Context {
   };
   arguments?: Array<Context>;
 }
+
 interface Visitor {
   [key: string]: {
     enter: EnterFn;
@@ -32,6 +35,7 @@ interface Visitor {
     enter: EnterFn;
   };
 }
+
 interface Ast {
   type: string;
   body: Array<unkObj>;
@@ -41,6 +45,7 @@ interface Ast {
     value: string;
   }>;
 }
+
 interface AstNode {
   type: string;
   body: Array<unkObj>;
@@ -52,6 +57,7 @@ interface AstNode {
   value?: string;
   params?: Array<unkObj>;
 }
+
 interface ParentNode {
   type: string;
   _context?: Array<{
@@ -59,9 +65,11 @@ interface ParentNode {
     value: string;
   }>;
 }
+
 interface unkObj {
   [key: string]: unknown;
 }
+
 interface GeneratorNode {
   // deno-lint-ignore no-explicit-any
   body: Array<any>;
@@ -75,17 +83,26 @@ interface GeneratorNode {
   name?: string;
   value?: string;
 }
+
 declare type EnterFn = (node: AstNode, parent?: ParentNode) => void;
+
 declare type ExitFn = EnterFn;
+
 declare type Expression = {
   type: string;
   callee?: Callee;
   arguments?: Array<Context>;
   expression: unkObj;
 };
+
 declare function tokenize(input: string): Array<Token>;
+
 declare function parse(tokens: Array<Token>): Ast;
+
 declare function traverse(ast: Ast, visitor: Visitor): void;
+
 declare function transform(ast: Ast): Ast;
+
 declare function generate(node: GeneratorNode): string;
+
 declare function compile(input: string): string;
