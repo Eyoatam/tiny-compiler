@@ -68,6 +68,20 @@ export interface unkObj {
   [key: string]: unknown;
 }
 
+export interface GeneratorNode {
+  // deno-lint-ignore no-explicit-any
+  body: Array<any>;
+  // deno-lint-ignore no-explicit-any
+  expression?: any;
+  // deno-lint-ignore no-explicit-any
+  callee?: any;
+  // deno-lint-ignore no-explicit-any
+  arguments?: Array<any>;
+  type?: string;
+  name?: string;
+  value?: string;
+}
+
 export type EnterFn = (node: AstNode, parent?: ParentNode) => void;
 export type ExitFn = EnterFn;
 
@@ -349,19 +363,7 @@ export function transform(ast: Ast): Ast {
 }
 
 // TODO: remove any types
-export function generate(node: {
-  // deno-lint-ignore no-explicit-any
-  body: Array<any>;
-  // deno-lint-ignore no-explicit-any
-  expression?: any;
-  // deno-lint-ignore no-explicit-any
-  callee?: any;
-  // deno-lint-ignore no-explicit-any
-  arguments?: Array<any>;
-  type?: string;
-  name?: string;
-  value?: string;
-}): string {
+export function generate(node: GeneratorNode): string {
   switch (node.type) {
     case "Program":
       return node.body.map(generate).join("\n");
