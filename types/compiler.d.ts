@@ -60,7 +60,20 @@ interface ParentNode {
   }>;
 }
 interface unkObj {
-  [x: string]: unknown;
+  [key: string]: unknown;
+}
+interface GeneratorNode {
+  // deno-lint-ignore no-explicit-any
+  body: Array<any>;
+  // deno-lint-ignore no-explicit-any
+  expression?: any;
+  // deno-lint-ignore no-explicit-any
+  callee?: any;
+  // deno-lint-ignore no-explicit-any
+  arguments?: Array<any>;
+  type?: string;
+  name?: string;
+  value?: string;
 }
 declare type EnterFn = (node: AstNode, parent?: ParentNode) => void;
 declare type ExitFn = EnterFn;
@@ -74,13 +87,5 @@ declare function tokenize(input: string): Array<Token>;
 declare function parse(tokens: Array<Token>): Ast;
 declare function traverse(ast: Ast, visitor: Visitor): void;
 declare function transform(ast: Ast): Ast;
-declare function generate(node: {
-  body: Array<any>;
-  expression?: any;
-  callee?: any;
-  arguments?: Array<any>;
-  type?: string;
-  name?: string;
-  value?: string;
-}): string;
+declare function generate(node: GeneratorNode): string;
 declare function compile(input: string): string;
