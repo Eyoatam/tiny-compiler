@@ -65,7 +65,7 @@ export interface ParentNode {
 }
 
 export interface unkObj {
-  [x: string]: unknown;
+  [key: string]: unknown;
 }
 
 export type EnterFn = (node: AstNode, parent?: ParentNode) => void;
