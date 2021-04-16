@@ -19,7 +19,7 @@ export interface Context {
 }
 
 export interface Visitor {
-  [key: string]: {
+  [x: string]: {
     enter: EnterFn;
     exit?: ExitFn;
   };
@@ -65,9 +65,10 @@ export interface ParentNode {
 }
 
 export interface unkObj {
-  [key: string]: unknown;
+  [x: string]: unknown;
 }
 
+// TODO: remove any types
 export interface GeneratorNode {
   // deno-lint-ignore no-explicit-any
   body: Array<any>;
@@ -260,6 +261,7 @@ export function traverse(ast: Ast, visitor: Visitor) {
 
       case "NumberLiteral":
         break;
+
       case "StringLiteral":
         break;
 
@@ -363,23 +365,28 @@ export function transform(ast: Ast): Ast {
   return newAst;
 }
 
-// TODO: remove any types
-export function generate(node: GeneratorNode): string {
-  switch (node.type) {
+export function generate<T extends GeneratorNode>(node: T): string {
+  switch (node.type ? node.type : "") {
     case "Program":
       return node.body.map(generate).join("\n");
+
     case "ExpressionStatement":
       return `${generate(node.expression)};`;
+
     case "CallExpression":
       return `${generate(node.callee)}(${node.arguments
         ?.map?.(generate)
         .join?.(", ")})`;
+
     case "Identifier":
       return node.name ? node.name : "";
+
     case "NumberLiteral":
       return node.value ? node.value : "";
+
     case "StringLiteral":
       return `"${node.value}"`;
+
     default:
       throw new TypeError(`unknown type ${node.type}`);
   }
