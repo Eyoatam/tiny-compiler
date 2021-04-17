@@ -388,7 +388,7 @@ export function generate<T extends GeneratorNode>(node: T): string {
       return `"${node.value}"`;
 
     default:
-      throw new TypeError(`unknown type ${node.type}`);
+      throw new TypeError(`Unknown type ${node.type}`);
   }
 }
 
@@ -399,3 +399,9 @@ export function compile(input: string): string {
   const output = generate(newAst);
   return output;
 }
+
+// const input = `"some", "string"`;
+// const tokens = tokenize(input);
+// const ast = parse(tokens);
+// const newAst = transform(ast);
+// generate(newAst);

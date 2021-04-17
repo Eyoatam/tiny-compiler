@@ -58,11 +58,11 @@ Deno.test("it should Tokenize string literals", () => {
 });
 
 Deno.test("it should throw a TypeError", () => {
-  const input = `(add 1)
-  (subtract 6 5);
-  `;
   assertThrows(
     () => {
+      const input = `(add 1)
+  (subtract 6 5);
+  `;
       tokenize(input);
     },
     TypeError,
@@ -117,11 +117,11 @@ Deno.test("it should parse not nested CallExpression", () => {
 });
 
 Deno.test("it should throw a TypeError When parsing", () => {
-  const input = `(add 1)
-  (subtract 6 5);
-  `;
   assertThrows(
     () => {
+      const input = `(add 1)
+      (subtract 6 5);
+      `;
       const tokens = tokenize(input);
       parse(tokens);
     },
@@ -183,6 +183,42 @@ Deno.test("it should generate code for not nested CallExpressions", () => {
   const output = generate(newAst);
   const code = "add(1);\nsubtract(6, 5);";
   assertEquals(code, output);
+});
+
+Deno.test("it should generate code with number literals", () => {
+  const input = "1 2";
+  const tokens = tokenize(input);
+  const ast = parse(tokens);
+  const newAst = transform(ast);
+  const generatedCode = generate(newAst);
+  assertEquals(generatedCode, "1\n2");
+});
+
+Deno.test("it should generate code with string literals", () => {
+  const input = `"some" "string"`;
+  const tokens = tokenize(input);
+  const ast = parse(tokens);
+  const newAst = transform(ast);
+  const generatedCode = generate(newAst);
+  assertEquals(
+    generatedCode,
+    `"some"
+"string"`,
+  );
+});
+
+Deno.test("it should throw a TypeError When generating", () => {
+  assertThrows(
+    () => {
+      const input = `"some", "string"`;
+      const tokens = tokenize(input);
+      const ast = parse(tokens);
+      const newAst = transform(ast);
+      generate(newAst);
+    },
+    TypeError,
+    "Unknown type ,",
+  );
 });
 
 Deno.test("it should compile code with nested CallExpressions", () => {
