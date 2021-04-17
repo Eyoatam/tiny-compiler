@@ -137,3 +137,22 @@ export const NotNestedStringLiteralAst = {
     },
   ],
 };
+
+export const StringLiteralAst = {
+  type: "Program",
+  body: [
+    { type: "StringLiteral", value: "some" },
+    { type: "StringLiteral", value: "string" },
+  ],
+};
+
+export const NumberLiteralAst = {
+  type: "Program",
+  body: [
+    { type: "NumberLiteral", value: "1" },
+    {
+      type: "NumberLiteral",
+      value: "2",
+    },
+  ],
+};

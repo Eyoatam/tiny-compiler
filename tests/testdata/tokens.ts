@@ -21,3 +21,19 @@ export const NotNestedCallExp = [
   { type: "number", value: "5" },
   { type: "paren", value: ")" },
 ];
+
+export const NumberLiteral = [
+  { type: "number", value: "1" },
+  {
+    type: "number",
+    value: "2",
+  },
+];
+
+export const StringLiteral = [
+  { type: "string", value: "some" },
+  {
+    type: "string",
+    value: "string",
+  },
+];

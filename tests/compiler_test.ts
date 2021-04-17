@@ -2,7 +2,6 @@ import {
   assertEquals,
   assertThrows,
 } from "https://deno.land/std@0.92.0/testing/asserts.ts";
-import { NestedCallExp, NotNestedCallExp } from "./testdata/tokens.ts";
 import {
   compile,
   generate,
@@ -11,12 +10,20 @@ import {
   transform,
 } from "../src/compiler.ts";
 import {
+  NestedCallExp,
+  NotNestedCallExp,
+  NumberLiteral,
+  StringLiteral,
+} from "./testdata/tokens.ts";
+import {
   NestedCallExpAst,
   NestedStringLiteralAst,
   NewNestedAst,
   NewNotNestedAst,
   NotNestedCallExpAst,
   NotNestedStringLiteralAst,
+  NumberLiteralAst,
+  StringLiteralAst,
 } from "./testdata/ast.ts";
 
 Deno.test("it should Tokenize nested CallExpressions", () => {
@@ -36,25 +43,13 @@ Deno.test("it should Tokenize not nested CallExpressions", () => {
 Deno.test("it should Tokenize number literals", () => {
   const input = "1 2";
   const tokens = tokenize(input);
-  assertEquals(tokens, [
-    { type: "number", value: "1" },
-    {
-      type: "number",
-      value: "2",
-    },
-  ]);
+  assertEquals(tokens, NumberLiteral);
 });
 
 Deno.test("it should Tokenize string literals", () => {
   const input = `"some" "string"`;
   const tokens = tokenize(input);
-  assertEquals(tokens, [
-    { type: "string", value: "some" },
-    {
-      type: "string",
-      value: "string",
-    },
-  ]);
+  assertEquals(tokens, StringLiteral);
 });
 
 Deno.test("it should throw a TypeError", () => {
@@ -74,29 +69,14 @@ Deno.test("it should parse string literals", () => {
   const input = `"some" "string"`;
   const tokens = tokenize(input);
   const ast = parse(tokens);
-  assertEquals(ast, {
-    type: "Program",
-    body: [
-      { type: "StringLiteral", value: "some" },
-      { type: "StringLiteral", value: "string" },
-    ],
-  });
+  assertEquals(ast, StringLiteralAst);
 });
 
 Deno.test("it should parse number literals", () => {
   const input = "1 2";
   const tokens = tokenize(input);
   const ast = parse(tokens);
-  assertEquals(ast, {
-    type: "Program",
-    body: [
-      { type: "NumberLiteral", value: "1" },
-      {
-        type: "NumberLiteral",
-        value: "2",
-      },
-    ],
-  });
+  assertEquals(ast, NumberLiteralAst);
 });
 
 Deno.test("it should parse nested CallExpression", () => {
