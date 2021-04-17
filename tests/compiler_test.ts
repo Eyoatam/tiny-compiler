@@ -1,5 +1,15 @@
-import { assertEquals } from "https://deno.land/std@0.92.0/testing/asserts.ts";
+import {
+  assertEquals,
+  assertThrows,
+} from "https://deno.land/std@0.92.0/testing/asserts.ts";
 import { NestedCallExp, NotNestedCallExp } from "./testdata/tokens.ts";
+import {
+  compile,
+  generate,
+  parse,
+  tokenize,
+  transform,
+} from "../src/compiler.ts";
 import {
   NestedCallExpAst,
   NestedStringLiteralAst,
@@ -8,21 +18,14 @@ import {
   NotNestedCallExpAst,
   NotNestedStringLiteralAst,
 } from "./testdata/ast.ts";
-import {
-  compile,
-  generate,
-  parse,
-  tokenize,
-  transform,
-} from "../src/compiler.ts";
 
-Deno.test("Tokenize nested CallExpressions", () => {
+Deno.test("it should Tokenize nested CallExpressions", () => {
   const input = "(add 1 (subtract 6 5))";
   const tokens = tokenize(input);
   assertEquals(NestedCallExp, tokens);
 });
 
-Deno.test("Tokenize not nested CallExpressions", () => {
+Deno.test("it should Tokenize not nested CallExpressions", () => {
   const input = `(add 1)
   (subtract 6 5)
   `;
@@ -30,7 +33,7 @@ Deno.test("Tokenize not nested CallExpressions", () => {
   assertEquals(NotNestedCallExp, tokens);
 });
 
-Deno.test("Tokenize number literals", () => {
+Deno.test("it should Tokenize number literals", () => {
   const input = "1 2";
   const tokens = tokenize(input);
   assertEquals(tokens, [
@@ -42,7 +45,7 @@ Deno.test("Tokenize number literals", () => {
   ]);
 });
 
-Deno.test("Tokenize string literals", () => {
+Deno.test("it should Tokenize string literals", () => {
   const input = `"some" "string"`;
   const tokens = tokenize(input);
   assertEquals(tokens, [
@@ -54,7 +57,20 @@ Deno.test("Tokenize string literals", () => {
   ]);
 });
 
-Deno.test("parse string literals", () => {
+Deno.test("it should throw a TypeError", () => {
+  const input = `(add 1)
+  (subtract 6 5);
+  `;
+  assertThrows(
+    () => {
+      tokenize(input);
+    },
+    TypeError,
+    "Unknown type ;",
+  );
+});
+
+Deno.test("it should parse string literals", () => {
   const input = `"some" "string"`;
   const tokens = tokenize(input);
   const ast = parse(tokens);
@@ -67,7 +83,7 @@ Deno.test("parse string literals", () => {
   });
 });
 
-Deno.test("parse number literals", () => {
+Deno.test("it should parse number literals", () => {
   const input = "1 2";
   const tokens = tokenize(input);
   const ast = parse(tokens);
@@ -83,14 +99,14 @@ Deno.test("parse number literals", () => {
   });
 });
 
-Deno.test("parse nested CallExpression", () => {
+Deno.test("it should parse nested CallExpression", () => {
   const input = "(add 1 (subtract 6 5))";
   const tokens = tokenize(input);
   const ast = parse(tokens);
   assertEquals(NestedCallExpAst, ast);
 });
 
-Deno.test("parse not nested CallExpression", () => {
+Deno.test("it should parse not nested CallExpression", () => {
   const input = `(add 1)
   (subtract 6 5)
   `;
@@ -100,7 +116,21 @@ Deno.test("parse not nested CallExpression", () => {
   assertEquals(NotNestedCallExpAst, ast);
 });
 
-Deno.test("Transform ast for nested CallExpressions", () => {
+Deno.test("it should throw a TypeError When parsing", () => {
+  const input = `(add 1)
+  (subtract 6 5);
+  `;
+  assertThrows(
+    () => {
+      const tokens = tokenize(input);
+      parse(tokens);
+    },
+    TypeError,
+    "Unknown type ;",
+  );
+});
+
+Deno.test("it should Transform ast for nested CallExpressions", () => {
   const input = "(add 1 (subtract 6 5))";
   const tokens = tokenize(input);
   const ast = parse(tokens);
@@ -108,7 +138,7 @@ Deno.test("Transform ast for nested CallExpressions", () => {
   assertEquals(NewNestedAst, newAst);
 });
 
-Deno.test("Transform ast for not nested CallExpressions", () => {
+Deno.test("it should Transform ast for not nested CallExpressions", () => {
   const input = `(add 1)
   (subtract 6 5)
   `;
@@ -118,7 +148,7 @@ Deno.test("Transform ast for not nested CallExpressions", () => {
   assertEquals(NewNotNestedAst, newAst);
 });
 
-Deno.test("Transform ast for StringLiterals", () => {
+Deno.test("it should Transform ast for StringLiterals", () => {
   const input = `(foo "foo") (baz "baz")`;
   const tokens = tokenize(input);
   const ast = parse(tokens);
@@ -126,7 +156,7 @@ Deno.test("Transform ast for StringLiterals", () => {
   assertEquals(NotNestedStringLiteralAst, newAst);
 });
 
-Deno.test("Transform ast for nested StringLiterals", () => {
+Deno.test("it should Transform ast for nested StringLiterals", () => {
   const input = `(foo "foo" (bar "bar"))`;
   const tokens = tokenize(input);
   const ast = parse(tokens);
@@ -134,7 +164,7 @@ Deno.test("Transform ast for nested StringLiterals", () => {
   assertEquals(NestedStringLiteralAst, newAst);
 });
 
-Deno.test("generate code for nested CallExpressions", () => {
+Deno.test("it should generate code for nested CallExpressions", () => {
   const input = "(add 1 (subtract 6 5))";
   const tokens = tokenize(input);
   const ast = parse(tokens);
@@ -144,7 +174,7 @@ Deno.test("generate code for nested CallExpressions", () => {
   assertEquals(code, output);
 });
 
-Deno.test("generate code for not nested CallExpressions", () => {
+Deno.test("it should generate code for not nested CallExpressions", () => {
   const input = `(add 1)
   (subtract 6 5)`;
   const tokens = tokenize(input);
@@ -155,14 +185,14 @@ Deno.test("generate code for not nested CallExpressions", () => {
   assertEquals(code, output);
 });
 
-Deno.test("compiler for code with nested CallExpressions", () => {
+Deno.test("it should compile code with nested CallExpressions", () => {
   const input = "(add 1 (subtract 6 5))";
   const output = compile(input);
   const code = "add(1, subtract(6, 5));";
   assertEquals(code, output);
 });
 
-Deno.test("compiler for code with not nested CallExpressions", () => {
+Deno.test("it should code with not nested CallExpressions", () => {
   const input = `(add 1)
   (subtract 6 5)`;
   const output = compile(input);
