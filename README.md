@@ -5,8 +5,8 @@
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Eyoatam/tiny-compiler/blob/main/LICENSE)
 
 > Based on Jamie Kyle's
-> [compiler](https://github.com/jamiebuilds/the-super-tiny-compiler) This is a
-> simple example of a modern compiler written in
+> [compiler](https://github.com/jamiebuilds/the-super-tiny-compiler) This is an
+> example of a simple, modern compiler. written in
 > [typescript](https://www.typescriptlang.org/) and running on
 > [deno](https://deno.land)
 
@@ -75,26 +75,10 @@ node in the AST.
 This function takes the AST and transforms it into a new AST
 
 ```js
-transform({
-  type: "Program",
-  body: [
-    {
-      type: "CallExpression",
-      name: "add",
-      params: [
-        { type: "NumberLiteral", value: "6" },
-        {
-          type: "CallExpression",
-          name: "subtract",
-          params: [
-            { type: "NumberLiteral", value: "6" },
-            { type: "NumberLiteral", value: "5" },
-          ],
-        },
-      ],
-    },
-  ],
-});
+const input = "(add 6 (subtract 6 5))";
+const tokens = tokenize(input);
+const ast = parse(tokens);
+const transformedAst = transform(ast);
 ```
 
 So The above function will return a transformed ast that would look like:
@@ -133,31 +117,11 @@ This function takes an AST and stringifies code back out. by calling it self
 recursively.
 
 ```js
-generate({
-    type: "Program",
-    body: [
-      {
-        type: "ExpressionStatement",
-        expression: {
-          type: "CallExpression",
-          callee: { type: "Identifier", name: "add" },
-          arguments: [
-            { type: "NumberLiteral", value: "1" },
-            {
-              type: "CallExpression",
-              callee: { type: "Identifier", name: "subtract" },
-              arguments: [
-                { type: "NumberLiteral", value: "6" },
-                { type: "NumberLiteral", value: "5" },
-              ],
-              expression: {},
-            },
-          ],
-          expression: {},
-        },
-      },
-    ],
-  };);
+const input = "(add 6 (subtract 6 5))";
+const tokens = tokenize(input);
+const ast = parse(tokens);
+const transformedAst = transform(ast);
+const output = generate(transformedAst);
 ```
 
 so the output for the above code will look like:
