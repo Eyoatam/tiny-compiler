@@ -306,7 +306,7 @@ export function transform(ast: Ast): Ast {
             type: string;
             value: string;
           }>;
-        }
+        },
       ) {
         parent?._context?.push?.({
           type: "NumberLiteral",
@@ -322,7 +322,7 @@ export function transform(ast: Ast): Ast {
         },
         parent?: {
           _context?: Array<Context>;
-        }
+        },
       ) {
         parent?._context?.push?.({
           type: "StringLiteral",
@@ -340,7 +340,7 @@ export function transform(ast: Ast): Ast {
         parent?: {
           type: string;
           _context?: Array<Context>;
-        }
+        },
       ) {
         let expression: Expression = {
           type: "CallExpression",
