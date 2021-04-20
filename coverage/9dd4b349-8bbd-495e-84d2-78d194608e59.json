@@ -1,0 +1,11 @@
+{
+  "scriptId": "70",
+  "url": "file:///Users/tame/Projects/OSS/tiny-compiler/tests/testdata/ast.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 9057, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

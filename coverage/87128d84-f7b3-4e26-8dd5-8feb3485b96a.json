@@ -1,0 +1,11 @@
+{
+  "scriptId": "69",
+  "url": "file:///Users/tame/Projects/OSS/tiny-compiler/tests/testdata/tokens.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2877, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}
