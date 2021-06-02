@@ -1,11 +1,7 @@
 import {
   assertEquals,
   assertThrows,
-<<<<<<< HEAD
 } from "https://deno.land/std@0.97.0/testing/asserts.ts";
-=======
-} from "https://deno.land/std@0.96.0/testing/asserts.ts";
->>>>>>> cca0208029f72fcba7c97115cc9eb95205f443d1
 import {
   compile,
   generate,
