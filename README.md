@@ -10,7 +10,7 @@
 > [typescript](https://www.typescriptlang.org/) and running on
 > [deno](https://deno.land)
 
-## Functions
+## Methods
 
 ### `tokenize()`
 
